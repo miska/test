@@ -196,7 +196,7 @@ release() {
 	done
 	git add ./feeds.conf
 	git ci -m "Turris OS $tversion"
-	git tag -s -m "Turris OS $tversion release" "v$tversion"
+	git tag -s -m "Turris OS $tversion release" -m "$(./helpers/turris-version.sh news)" "v$tversion"
 
 	info "Tag $tag was created. Review changes and push it with: git push --tags origin"
 }
