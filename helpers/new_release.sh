@@ -71,12 +71,14 @@ fetch_files() {
 	FETCH_DIR="$(mktemp -d)"
 	GIT_HASH_LISTS="$FETCH_DIR/git-hash-lists"
 	GIT_HASH_PACKAGES="$FETCH_DIR/git-hash-packages"
+	EXAMPLE_SIG="$FETCH_DIR/example.sig"
 	TOS_VERSION="$FETCH_DIR/tos-version"
 
 	for board in "${BOARDS[@]}"; do
 		curl -s "$REPO/$branch/lists/turris-version" >"$TOS_VERSION-$board"
 		curl -s "$REPO/$branch/$board/lists/git-hash" >"$GIT_HASH_LISTS-$board"
 		curl -s "$REPO/$branch/$board/packages/git-hash" >"$GIT_HASH_PACKAGES-$board"
+		curl -s "$REPO/$branch/lists/base.lua.sig" >"$EXAMPLE_SIG"
 	done
 }
 
@@ -173,6 +175,14 @@ verify() {
 }
 
 ##########
+export_dates() {
+	local fetched_date="$(stat -c '%Y' "$EXAMPLE_SIG")"
+	fetched_date="$(date --iso-8601=second -d "@$fetched_date")"
+	export GIT_COMMITTER_DATE="$fetched_date"
+	export GIT_AUTHOR_DATE="$fetched_date"
+}
+
+##########
 release() {
 	local branch="$1"
 	local tversion target_hsh owrt_hsh
@@ -195,6 +205,7 @@ release() {
 		feeds_conf_set "$feed" "${FEEDS["$feed"]}"
 	done
 	git add ./feeds.conf
+	export_dates
 	git ci -m "Turris OS $tversion"
 	git tag -s -m "Turris OS $tversion release" -m "$(./helpers/turris-version.sh news)" "v$tversion"
 
