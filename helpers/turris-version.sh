@@ -22,8 +22,7 @@ get_version() {
 }
 
 news_text() {
-	awk '/^-+$/{if(flg) nextfile; else flg=1;next} flg==1{prev=$0;flg=2;next} flg==2{print prev;prev=$0}' "$news_file" | \
-		grep .
+	awk '/^-+$/{if(flg) nextfile; else flg=1;next} flg==1{prev=$0;flg=2;next} flg==2{ if (prev !~ /^$/) {print prev};prev=$0}' "$news_file"
 }
 
 gen_package() {
