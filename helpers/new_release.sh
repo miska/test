@@ -75,7 +75,7 @@ fetch_files() {
 	TOS_VERSION="$FETCH_DIR/tos-version"
 
 	for board in "${BOARDS[@]}"; do
-		curl -s "$REPO/$branch/lists/turris-version" >"$TOS_VERSION-$board"
+		curl -s "$REPO/$branch/$board/lists/turris-version" >"$TOS_VERSION-$board"
 		curl -s "$REPO/$branch/$board/lists/git-hash" >"$GIT_HASH_LISTS-$board"
 		curl -s "$REPO/$branch/$board/packages/git-hash" >"$GIT_HASH_PACKAGES-$board"
 		curl -s "$REPO/$branch/lists/base.lua.sig" >"$EXAMPLE_SIG"
