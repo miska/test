@@ -73,6 +73,8 @@ fetch_files() {
 	GIT_HASH_PACKAGES="$FETCH_DIR/git-hash-packages"
 	EXAMPLE_SIG="$FETCH_DIR/example.sig"
 	TOS_VERSION="$FETCH_DIR/tos-version"
+	RELEASE_DATE="$(curl -s --head "$REPO/$branch/mox/packages/git-hash.sig" | sed -n 's/^Last-Modified: //p')"
+	RELEASE_DATE="$(date --iso-8601=second -d "$RELEASE_DATE")"
 
 	for board in "${BOARDS[@]}"; do
 		curl -s "$REPO/$branch/$board/lists/turris-version" >"$TOS_VERSION-$board"
@@ -176,10 +178,8 @@ verify() {
 
 ##########
 export_dates() {
-	local fetched_date="$(stat -c '%Y' "$EXAMPLE_SIG")"
-	fetched_date="$(date --iso-8601=second -d "@$fetched_date")"
-	export GIT_COMMITTER_DATE="$fetched_date"
-	export GIT_AUTHOR_DATE="$fetched_date"
+	export GIT_COMMITTER_DATE="$RELEASE_DATE"
+	export GIT_AUTHOR_DATE="$RELEASE_DATE"
 }
 
 ##########
@@ -206,7 +206,7 @@ release() {
 	done
 	git add ./feeds.conf
 	export_dates
-	git ci -m "Turris OS $tversion"
+	git commit -m "Turris OS $tversion"
 	git tag -s -m "Turris OS $tversion release" -m "$(./helpers/turris-version.sh news)" "v$tversion"
 
 	info "Tag $tag was created. Review changes and push it with: git push --tags origin"
